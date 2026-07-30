@@ -1,6 +1,8 @@
 # TrustMed Clinical Navigator Dashboard
 The TrustMed Clinical Navigator Dashboard is a modern web application designed for healthcare professionals to seamlessly review patient data and consult an AI-powered clinical research assistant. The application merges real-time patient metric tracking (e.g., A1C levels, General Health Scores) with an enterprise-grade Retrieval-Augmented Generation (RAG) pipeline backed by Amazon Bedrock.
 
+[view MedTrust Navigator dashboard](https://trust-med-navigator-dashboard-3om8h2l6p-sravani3.vercel.app/)
+
 # Key Features
 Patient Data Integration: Fetches and displays real-time patient clinical records directly from AWS DynamoDB.
 
