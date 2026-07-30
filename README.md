@@ -1,70 +1,102 @@
-# Getting Started with Create React App
+# TrustMed Clinical Navigator Dashboard
+The TrustMed Clinical Navigator Dashboard is a modern web application designed for healthcare professionals to seamlessly review patient data and consult an AI-powered clinical research assistant. The application merges real-time patient metric tracking (e.g., A1C levels, General Health Scores) with an enterprise-grade Retrieval-Augmented Generation (RAG) pipeline backed by Amazon Bedrock.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Key Features
+Patient Data Integration: Fetches and displays real-time patient clinical records directly from AWS DynamoDB.
 
-## Available Scripts
+AI Clinical Research Assistant: An integrated chatbot grounded in custom medical research documents (PDFs) via an Amazon Bedrock Knowledge Base.
 
-In the project directory, you can run:
+Intelligent Prompt Formatting: Automatically structures complex AI medical responses into concise, scannable bullet points optimized for quick clinical review.
 
-### `npm start`
+Serverless Architecture: A lightweight, highly scalable AWS backend utilizing API Gateway and Lambda.
+# Architecture & Tech Stack
+Frontend
+React.js: Single Page Application (SPA) architecture.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Tailwind CSS: Utility-first styling for a clean, responsive medical UI.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Vercel: Automated, continuous deployment hosting.
 
-### `npm test`
+Backend (AWS)
+AWS API Gateway: Manages CORS and routes REST requests to the backend logic.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+AWS Lambda (Python 3.x): A unified serverless function handling dual routing:
 
-### `npm run build`
+Route 1: Parses chatbot queries and interacts with the Bedrock Knowledge Base.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Route 2: Scans and retrieves standard patient metrics from the database.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Amazon DynamoDB: NoSQL database table (TrustMed_Patients) storing JSON-structured clinical scenarios and visit histories.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Amazon Bedrock:
 
-### `npm run eject`
+Knowledge Base: Managed vector store (ID: FVL4R9DVUN) containing indexed clinical research reports (S3 data source).
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Foundation Model: Anthropic Claude 3 / 4.5 Haiku via Cross-Region Inference Profiles.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# Local Development Setup
+Prerequisites
+Node.js (v16+)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+An active AWS Account with permissions for API Gateway, Lambda, DynamoDB, and Bedrock.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Git installed locally.
 
-## Learn More
+1. Clone and Install
+Bash
+git clone https://github.com/YOUR_GITHUB_USERNAME/trustmed-navigator-dashboard.git
+cd trustmed-navigator-dashboard
+npm install
+2. Configure Environment Variables
+Create a .env file in the root directory and add your API Gateway endpoint:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Code snippet
+REACT_APP_API_URL=https://your-api-gateway-id.execute-api.us-east-2.amazonaws.com/
+3. Run Locally
+Bash
+npm start
+The application will spin up at http://localhost:3000.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# AWS Backend Configuration Guide
+To replicate the cloud infrastructure for this application, ensure the following AWS services are configured in us-east-2 (Ohio) or your preferred region:
 
-### Code Splitting
+DynamoDB
+Create a table named TrustMed_Patients.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Ensure your mock patient JSON data is loaded into the table.
 
-### Analyzing the Bundle Size
+Amazon Bedrock
+Create a Knowledge Base backed by an S3 bucket containing your medical research PDFs.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Sync the Data Source.
 
-### Making a Progressive Web App
+Ensure Model Access is granted for Anthropic Claude 3 Haiku in your AWS region.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+AWS Lambda
+Deploy a Python 3.x Lambda function containing the boto3 routing logic.
 
-### Advanced Configuration
+Crucial IAM Permissions: The Lambda Execution Role must have an inline policy granting:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+dynamodb:Scan on the TrustMed_Patients table.
 
-### Deployment
+bedrock:RetrieveAndGenerate and bedrock:Retrieve on your Knowledge Base ARN.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+bedrock:InvokeModel on the Anthropic Claude Foundation Model ARN.
 
-### `npm run build` fails to minify
+API Gateway
+Create an HTTP API (or REST API) triggering your Lambda function.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Enable CORS, allowing OPTIONS, POST, and GET methods with the * wildcard for origins (or restrict to your specific Vercel domain in production).
+
+# Deployment
+This project is configured for seamless deployment on Vercel.
+
+Push your code to a GitHub repository.
+
+Log in to Vercel and click Add New Project.
+
+Import the repository.
+
+Add your REACT_APP_API_URL to the Environment Variables section in the Vercel dashboard.
+
+Click Deploy. Vercel will automatically build and publish the live dashboard.
